@@ -8,6 +8,6 @@
     <fragment
         android:id="@+id/destination_landing_page_fragment"
         android:name="com.example.t_mobilecodingchallengeanthonymyers.ui.main.LandingPageFragment"
-        tools:layout="@layout/landing_page_fragment" />
+        tools:layout="@layout/fragment_landing_page" />
 
 </navigation>

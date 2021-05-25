@@ -5,10 +5,9 @@ import retrofit2.http.GET
 
 class CardManager {
     private val service: CardService
-    private val retrofit = RetrofitService.providesRetrofitService()
 
-    init{
-        service = retrofit.create(CardService::class.java)
+    init {
+        service = RetrofitService.providesRetrofitService().create(CardService::class.java)
     }
 
     suspend fun getCards() = service.getCards()
@@ -18,7 +17,7 @@ class CardManager {
     * It would include different queries to fetch data from the endpoint. For
     * the purpose of this application, there is only one request that is needed.
     * */
-    interface CardService{
+    interface CardService {
         @GET("/test/home")
         suspend fun getCards(): PageDTO
     }
