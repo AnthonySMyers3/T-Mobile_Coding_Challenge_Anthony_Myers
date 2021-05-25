@@ -1,28 +1,32 @@
 package com.example.t_mobilecodingchallengeanthonymyers.ui.main
 
-import android.content.Context
-import android.content.SharedPreferences
-
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import com.example.t_mobilecodingchallengeanthonymyers.R
 import com.example.t_mobilecodingchallengeanthonymyers.adapters.CardAdapter
+import com.example.t_mobilecodingchallengeanthonymyers.data.models.CardObjectDTO
 import com.example.t_mobilecodingchallengeanthonymyers.data.models.CardsDTO
 import com.example.t_mobilecodingchallengeanthonymyers.databinding.LandingPageFragmentBinding
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.io.*
+import java.lang.Exception
+import java.nio.Buffer
 
 
 class LandingPageFragment : Fragment() {
+
     private var _binding: LandingPageFragmentBinding? = null
     private val binding: LandingPageFragmentBinding get() = _binding!!
 
-    private lateinit var viewModel: MainViewModel
+    private val cardViewModel: CardViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,17 +39,27 @@ class LandingPageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity()).get(MainViewModel::class.java)
-        val sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE)
 
-        viewModel.loading.observe(viewLifecycleOwner, Observer {
-            binding.loaderPb.visibility = ProgressBar.INVISIBLE
-            if (it == "success") {
-                onSuccess(sharedPref)
-            } else if (it == "error") {
-                onError(sharedPref)
-            }
-        })
+        with(binding) {
+
+            cardViewModel.event.observe(viewLifecycleOwner, Observer {
+                when (it) {
+                    is CardViewModel.Event.Loading -> {
+                        loaderPb.isVisible = it.isLoading
+                    }
+                    is CardViewModel.Event.Success -> {
+                        loaderPb.isVisible = it.isLoading
+                        binding.contentRv.adapter = CardAdapter(it.data)
+                        cacheSession()
+                    }
+                    is CardViewModel.Event.Error -> {
+                        loaderPb.isVisible = it.isLoading
+                        readCachedSession()
+                    }
+
+                }
+            })
+        }
     }
 
     override fun onDestroy() {
@@ -53,36 +67,29 @@ class LandingPageFragment : Fragment() {
         super.onDestroy()
     }
 
+    private fun cacheSession(){
+        val cacheFile = File(context?.cacheDir, "CachedSession")
+        val fw = FileWriter(cacheFile.absoluteFile)
+        val bw = BufferedWriter(fw)
+        bw.write(Gson().toJson(cardViewModel.cardsList.value))
+        bw.close()
+    }
 
-    /*
-    * The data received by the API call gets stored into shared preferences
-    * to be accessible for a session that is not connected to the internet.
-    * I would consider restructuring this to either cache this information or
-    * store inside of a RoomDb.
-    * */
-    private fun onSuccess(sharedPref: SharedPreferences){
-        binding.contentRv.adapter = CardAdapter(viewModel.cardList!!)
-
-        with(sharedPref.edit()) {
-            putString(
-                getString(R.string.previous_card_instance),
-                Gson().toJson(viewModel.cardList)
-            )
-            apply()
+    private fun readCachedSession(){
+        try {
+            val cacheFile = File(context?.cacheDir, "CachedSession")
+            val fr = FileReader(cacheFile.absoluteFile)
+            val br = BufferedReader(fr)
+            val listType = object: TypeToken<List<CardObjectDTO>>(){}.type
+            binding.contentRv.adapter = CardAdapter(Gson().fromJson(br.readText(), listType))
+            br.close()
+        }catch (e: Exception){
+            binding.couldNotDownloadTv.visibility = TextView.VISIBLE
+            Log.d(TAG, e.message.toString())
         }
     }
 
-    /*
-    * One shortcoming of having the data stored in shared preferences is that the
-    * images are still fetched remotely. Converting the images into a byte array and
-    * storing in cache or RoomDb could be a possible solution.
-    * */
-    private fun onError(sharedPref: SharedPreferences){
-        val prevSession =
-            sharedPref.getString(getString(R.string.previous_card_instance), null)
-        if (prevSession != null) {
-            binding.contentRv.adapter =
-                CardAdapter(Gson().fromJson(prevSession, CardsDTO::class.java))
-        }
+    companion object {
+        private val TAG = LandingPageFragment::class.java.simpleName
     }
 }

@@ -1,12 +1,13 @@
 package com.example.t_mobilecodingchallengeanthonymyers.data.repos
 
-import com.example.t_mobilecodingchallengeanthonymyers.data.models.PageDTO
+import com.example.t_mobilecodingchallengeanthonymyers.data.models.CardObjectDTO
+import com.example.t_mobilecodingchallengeanthonymyers.data.models.CardsDTO
 import com.example.t_mobilecodingchallengeanthonymyers.data.remote.network.CardManager
 
-class CardRepository {
+object CardRepository {
     private val cardManager: CardManager by lazy{
         CardManager()
     }
 
-    suspend fun getCards(): PageDTO = cardManager.getCards()
+    suspend fun getCards(): List<CardObjectDTO> = cardManager.getCards().page.cards
 }

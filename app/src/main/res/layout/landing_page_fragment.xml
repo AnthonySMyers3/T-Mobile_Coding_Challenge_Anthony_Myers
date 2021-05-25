@@ -19,4 +19,14 @@
         android:layout_height="match_parent"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
+    <TextView
+        android:id="@+id/could_not_download_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/could_not_download_content"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"
+        android:visibility="gone"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

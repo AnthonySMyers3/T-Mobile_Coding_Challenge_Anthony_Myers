@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">T-Mobile Coding Challenge Anthony Myers</string>
     <string name="previous_card_instance">PrevSession</string>
+    <string name="could_not_download_content">Could not download content.</string>
 </resources>
