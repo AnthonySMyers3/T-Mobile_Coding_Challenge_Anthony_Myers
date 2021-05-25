@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.t_mobilecodingchallengeanthonymyers.data.models.CardObjectDTO
-import com.example.t_mobilecodingchallengeanthonymyers.data.models.CardsDTO
 import com.example.t_mobilecodingchallengeanthonymyers.data.repos.CardRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,7 +44,6 @@ class CardViewModel : ViewModel() {
             }
         }
     }
-
 
     companion object {
         private val TAG = CardViewModel::class.java.simpleName

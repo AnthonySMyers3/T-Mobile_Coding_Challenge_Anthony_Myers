@@ -12,13 +12,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.example.t_mobilecodingchallengeanthonymyers.adapters.CardAdapter
 import com.example.t_mobilecodingchallengeanthonymyers.data.models.CardObjectDTO
-import com.example.t_mobilecodingchallengeanthonymyers.data.models.CardsDTO
 import com.example.t_mobilecodingchallengeanthonymyers.databinding.LandingPageFragmentBinding
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.*
 import java.lang.Exception
-import java.nio.Buffer
 
 
 class LandingPageFragment : Fragment() {
@@ -67,23 +65,23 @@ class LandingPageFragment : Fragment() {
         super.onDestroy()
     }
 
-    private fun cacheSession(){
-        val cacheFile = File(context?.cacheDir, "CachedSession")
+    private fun cacheSession() {
+        val cacheFile = File(context?.cacheDir, CACHED_FILE)
         val fw = FileWriter(cacheFile.absoluteFile)
         val bw = BufferedWriter(fw)
         bw.write(Gson().toJson(cardViewModel.cardsList.value))
         bw.close()
     }
 
-    private fun readCachedSession(){
+    private fun readCachedSession() {
         try {
-            val cacheFile = File(context?.cacheDir, "CachedSession")
+            val cacheFile = File(context?.cacheDir, CACHED_FILE)
             val fr = FileReader(cacheFile.absoluteFile)
             val br = BufferedReader(fr)
-            val listType = object: TypeToken<List<CardObjectDTO>>(){}.type
+            val listType = object : TypeToken<List<CardObjectDTO>>() {}.type
             binding.contentRv.adapter = CardAdapter(Gson().fromJson(br.readText(), listType))
             br.close()
-        }catch (e: Exception){
+        } catch (e: Exception) {
             binding.couldNotDownloadTv.visibility = TextView.VISIBLE
             Log.d(TAG, e.message.toString())
         }
@@ -91,5 +89,6 @@ class LandingPageFragment : Fragment() {
 
     companion object {
         private val TAG = LandingPageFragment::class.java.simpleName
+        private const val CACHED_FILE = "CachedSession"
     }
 }

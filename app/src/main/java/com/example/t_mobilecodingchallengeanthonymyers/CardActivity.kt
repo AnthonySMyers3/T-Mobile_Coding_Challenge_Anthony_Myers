@@ -1,6 +1,5 @@
 package com.example.t_mobilecodingchallengeanthonymyers
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.Navigation
