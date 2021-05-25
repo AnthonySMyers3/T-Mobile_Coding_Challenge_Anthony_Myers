@@ -1,18 +1,20 @@
 package com.example.t_mobilecodingchallengeanthonymyers.ui.main
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.t_mobilecodingchallengeanthonymyers.data.models.CardObjectDTO
 import com.example.t_mobilecodingchallengeanthonymyers.data.repos.CardRepository
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.*
 import java.lang.Exception
 
-class CardViewModel : ViewModel() {
+class CardViewModel(application: Application) : AndroidViewModel(application) {
     private var cardRepository = CardRepository
+    private var appContext = application.applicationContext
 
     private var _cardsList: MutableLiveData<List<CardObjectDTO>> = MutableLiveData()
     val cardsList: LiveData<List<CardObjectDTO>> get() = _cardsList
@@ -38,15 +40,40 @@ class CardViewModel : ViewModel() {
             try {
                 _cardsList.postValue(cardRepository.getCards())
                 _event.postValue(Event.Success(data = cardRepository.getCards()))
+                writeCachedSession()
             } catch (e: Exception) {
-                _event.postValue(Event.Error())
+                readCachedSession()
                 Log.d(TAG, e.message.toString())
             }
         }
     }
 
+    private fun writeCachedSession() {
+        val cacheFile = File(appContext.cacheDir, CACHED_FILE)
+        val fw = FileWriter(cacheFile.absoluteFile)
+        val bw = BufferedWriter(fw)
+        bw.write(Gson().toJson(cardsList.value))
+        bw.close()
+    }
+
+    private fun readCachedSession() {
+        try {
+            val cacheFile = File(appContext.cacheDir, CACHED_FILE)
+            val fr = FileReader(cacheFile.absoluteFile)
+            val br = BufferedReader(fr)
+            val cachedData = Gson().fromJson(br.readText(), Array<CardObjectDTO>::class.java).toList()
+            _cardsList.postValue(cachedData)
+            _event.postValue(Event.Success(data = cachedData))
+            br.close()
+        } catch (e: Exception) {
+            _event.postValue(Event.Error())
+            Log.d(TAG, e.message.toString())
+        }
+    }
+
     companion object {
         private val TAG = CardViewModel::class.java.simpleName
+        private const val CACHED_FILE = "CachedSession"
     }
 
     sealed class Event {
