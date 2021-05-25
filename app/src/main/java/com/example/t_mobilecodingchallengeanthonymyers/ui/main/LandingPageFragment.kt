@@ -48,7 +48,7 @@ class LandingPageFragment : Fragment() {
                     is CardViewModel.Event.Success -> {
                         loaderPb.isVisible = it.isLoading
                         binding.contentRv.adapter = CardAdapter(it.data)
-                        cacheSession()
+                        writeCachedSession()
                     }
                     is CardViewModel.Event.Error -> {
                         loaderPb.isVisible = it.isLoading
@@ -65,7 +65,7 @@ class LandingPageFragment : Fragment() {
         super.onDestroy()
     }
 
-    private fun cacheSession() {
+    private fun writeCachedSession() {
         val cacheFile = File(context?.cacheDir, CACHED_FILE)
         val fw = FileWriter(cacheFile.absoluteFile)
         val bw = BufferedWriter(fw)
